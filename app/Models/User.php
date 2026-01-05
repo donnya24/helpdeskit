@@ -4,11 +4,10 @@ namespace App\Models;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable;
+    use Notifiable;
 
     protected $fillable = [
         'name',
@@ -16,7 +15,7 @@ class User extends Authenticatable
         'password',
         'role',
         'phone',
-        'department',
+        'department'
     ];
 
     protected $hidden = [
@@ -29,23 +28,18 @@ class User extends Authenticatable
         'password' => 'hashed',
     ];
 
-    /* =====================
-     |  ROLE HELPER
-     ===================== */
-
-    public function isAdmin(): bool
+    public function isAdmin()
     {
+        // Debug: Lihat role user
+        // \Log::info('User role check: ' . $this->email . ' = ' . $this->role);
+        
         return $this->role === 'admin';
     }
 
-    public function isUser(): bool
+    public function isUser()
     {
         return $this->role === 'user';
     }
-
-    /* =====================
-     |  RELATIONS
-     ===================== */
 
     public function tickets()
     {

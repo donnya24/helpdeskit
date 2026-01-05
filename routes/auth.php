@@ -5,12 +5,16 @@ use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;
 
 Route::middleware('guest')->group(function () {
-    Volt::route('register', 'pages.auth.register')
-        ->name('register');
-
+    // Hanya LOGIN saja
     Volt::route('login', 'pages.auth.login')
         ->name('login');
 
+    // Redirect register ke login
+    Route::get('register', function () {
+        return redirect()->route('login');
+    })->name('register');
+
+    // Opsional: Jika butuh forgot password
     Volt::route('forgot-password', 'pages.auth.forgot-password')
         ->name('password.request');
 
@@ -19,6 +23,7 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::middleware('auth')->group(function () {
+    // Email verification (opsional)
     Volt::route('verify-email', 'pages.auth.verify-email')
         ->name('verification.notice');
 

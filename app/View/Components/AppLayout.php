@@ -12,6 +12,12 @@ class AppLayout extends Component
      */
     public function render(): View
     {
-        return view('layouts.app');
+        // Pastikan user sudah login sebelum render layout
+        if (!auth()->check()) {
+            // Jika belum login, gunakan guest layout
+            return view('layouts.guest');
+        }
+
+        return view('livewire.layout.app');
     }
 }
