@@ -13,12 +13,11 @@ use Livewire\Form;
 class LoginForm extends Form
 {
     #[Validate('required|string|email')]
-    public string $email = '';
+    public string $email = 'admin@example.com';
 
     #[Validate('required|string')]
-    public string $password = '';
+    public string $password = 'password';
 
-    #[Validate('boolean')]
     public bool $remember = false;
 
     /**
@@ -26,23 +25,31 @@ class LoginForm extends Form
      *
      * @throws \Illuminate\Validation\ValidationException
      */
-    public function authenticate(): void
+    public function login(): void
     {
+        $this->validate();
+
         $this->ensureIsNotRateLimited();
 
-        if (! Auth::attempt($this->only(['email', 'password']), $this->remember)) {
+        if (! Auth::attempt([
+            'email' => $this->email,
+            'password' => $this->password,
+        ], $this->remember)) {
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
-                'form.email' => trans('auth.failed'),
+                'email' => trans('auth.failed'),
             ]);
         }
 
         RateLimiter::clear($this->throttleKey());
+
+        // Regenerate session
+        session()->regenerate();
     }
 
     /**
-     * Ensure the authentication request is not rate limited.
+     * Ensure the login request is not rate limited.
      */
     protected function ensureIsNotRateLimited(): void
     {
@@ -55,7 +62,7 @@ class LoginForm extends Form
         $seconds = RateLimiter::availableIn($this->throttleKey());
 
         throw ValidationException::withMessages([
-            'form.email' => trans('auth.throttle', [
+            'email' => trans('auth.throttle', [
                 'seconds' => $seconds,
                 'minutes' => ceil($seconds / 60),
             ]),
@@ -63,7 +70,7 @@ class LoginForm extends Form
     }
 
     /**
-     * Get the authentication rate limiting throttle key.
+     * Get the rate limiting throttle key for the request.
      */
     protected function throttleKey(): string
     {
